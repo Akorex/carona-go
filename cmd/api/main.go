@@ -1,6 +1,8 @@
 package main
 
 import (
+	"caronago/internal/config"
+	"caronago/internal/db"
 	"caronago/internal/middleware"
 	"caronago/internal/response"
 	"context"
@@ -13,20 +15,31 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("Note: no .env file provided, could not find environment variables")
+	cfg, err := config.Load()
+
+	if err != nil {
+		log.Fatalf("Configuration error: %v\n", err)
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8000"
+	database, err := db.Connect(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("Database connection error: %v", err)
 	}
 
-	router := gin.Default()
+	log.Println("Connected to PostgreSQL with connection pooling")
+
+	router := gin.New()
+
+	router.Use(
+		middleware.RequestID(),
+		middleware.StructuredLogger(),
+		gin.Recovery(),
+	)
+
+	router.HandleMethodNotAllowed = true
 	router.NoRoute(middleware.NoRoute())
 	router.NoMethod(middleware.NoMethod())
 
@@ -37,7 +50,7 @@ func main() {
 	})
 
 	srv := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + cfg.Port,
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -45,7 +58,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("🚀 Server running on http://localhost:%s", port)
+		log.Printf("🚀 Server running on http://localhost:%s", cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Server failed to start: %v\n", err)
 		}
@@ -62,6 +75,14 @@ func main() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	if sqlDB, err := database.DB(); err == nil {
+		if err := sqlDB.Close(); err != nil {
+			log.Printf("Error closing database pool: %v", err)
+		} else {
+			log.Println("Database connection pool closed successfully")
+		}
 	}
 
 	log.Println("Server exited cleanly 👋")

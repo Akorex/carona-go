@@ -1,4 +1,4 @@
-﻿package config
+package config
 
 import (
 	"fmt"
@@ -16,15 +16,14 @@ type Config struct {
 	JWTExpiresInHours int    `validate:"required,min=1"`
 }
 
-// Load reads .env, loads environment variables, and validates them (Yup/Zod style).
 func Load() (*Config, error) {
 	// Load .env file if present
 	_ = godotenv.Load()
 
 	cfg := &Config{
 		Port:              getEnv("PORT", "8000"),
-		DatabaseURL:       getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/caronago?sslmode=disable"),
-		JWTSecret:         getEnv("JWT_SECRET", "super-secret-key-that-is-at-least-16-chars"),
+		DatabaseURL:       os.Getenv("DATABASE_URL"),
+		JWTSecret:         os.Getenv("JWT_SECRET"),
 		JWTExpiresInHours: getEnvAsInt("JWT_EXPIRES_IN_HOURS", 24),
 	}
 
