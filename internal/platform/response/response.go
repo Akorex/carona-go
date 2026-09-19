@@ -3,7 +3,7 @@ package response
 import (
 	"net/http"
 
-	"caronago/internal/apierror"
+	"caronago/internal/platform/apierror"
 
 	"github.com/gin-gonic/gin"
 )

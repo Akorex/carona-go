@@ -1,10 +1,10 @@
 package main
 
 import (
-	"caronago/internal/config"
-	"caronago/internal/db"
-	"caronago/internal/middleware"
-	"caronago/internal/response"
+	"caronago/internal/modules/health"
+	"caronago/internal/platform/config"
+	"caronago/internal/platform/db"
+	"caronago/internal/platform/middleware"
 	"context"
 	"errors"
 	"log"
@@ -43,11 +43,7 @@ func main() {
 	router.NoRoute(middleware.NoRoute())
 	router.NoMethod(middleware.NoMethod())
 
-	router.GET("/health", func(c *gin.Context) {
-		response.SendOK(c, "Carona API is running smoothly", gin.H{
-			"status": "healthy",
-		})
-	})
+	health.RegisterRoutes(router)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,

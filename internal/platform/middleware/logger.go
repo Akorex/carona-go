@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"caronago/internal/logger"
+	"caronago/internal/platform/logger"
 	"time"
 
 	"github.com/gin-gonic/gin"

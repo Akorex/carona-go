@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"caronago/internal/response"
+	"caronago/internal/platform/response"
 	"fmt"
 	"net/http"
 
