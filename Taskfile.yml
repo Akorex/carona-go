@@ -1,0 +1,67 @@
+# https://taskfile.dev
+version: '3'
+
+tasks:
+  default:
+    desc: List all available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # --- Development ---
+  dev:
+    desc: Start API server with live-reloading (Air)
+    cmds:
+      - air
+
+  build:
+    desc: Build production binary for API server
+    cmds:
+      - go build -o ./bin/api.exe ./cmd/api
+
+  # --- Quality & Testing ---
+  test:
+    desc: Run all tests with race detector
+    cmds:
+      - go test -v -race ./...
+
+  vet:
+    desc: Run Go static code analysis (go vet)
+    cmds:
+      - go vet ./...
+
+  fmt:
+    desc: Format all Go files with gofmt
+    cmds:
+      - gofmt -s -w .
+
+  check:
+    desc: Run pre-commit checks locally via Lefthook
+    cmds:
+      - lefthook run pre-commit --all-files
+
+  # --- Migrations (Goose) ---
+  migrate:status:
+    desc: Show status of all database migrations
+    cmds:
+      - go run cmd/migrate/main.go status
+
+  migrate:up:
+    desc: Apply all pending database migrations
+    cmds:
+      - go run cmd/migrate/main.go up
+
+  migrate:down:
+    desc: Roll back the most recent database migration
+    cmds:
+      - go run cmd/migrate/main.go down
+
+  migrate:create:
+    desc: Create a new SQL migration (e.g. task migrate:create -- add_rides_table)
+    cmds:
+      - go run cmd/migrate/main.go create {{.CLI_ARGS}} sql
+
+  migrate:reset:
+    desc: Roll back ALL database migrations
+    cmds:
+      - go run cmd/migrate/main.go reset

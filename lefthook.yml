@@ -1,0 +1,18 @@
+# Lefthook pre-commit configuration (Husky + lint-staged equivalent)
+
+pre-commit:
+  parallel: true
+  commands:
+    # 1. Formats staged Go files and re-stages them automatically
+    gofmt:
+      glob: "*.go"
+      run: gofmt -l -w {staged_files}
+      stage_fixed: true
+
+    # 2. Validates compiler correctness and static checks across all packages
+    govet:
+      run: go vet ./...
+
+    # 3. Runs fast tests
+    gotest:
+      run: go test -short ./...
