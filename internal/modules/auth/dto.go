@@ -7,3 +7,8 @@ type RegisterInput struct {
 	Password  string `json:"password" binding:"required,min=6"`
 	Gender    Gender `json:"gender" binding:"required"`
 }
+
+type AuthResponse struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
+}

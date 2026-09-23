@@ -1,6 +1,7 @@
 package main
 
 import (
+	"caronago/internal/modules/auth"
 	"caronago/internal/modules/health"
 	"caronago/internal/platform/config"
 	"caronago/internal/platform/db"
@@ -44,6 +45,9 @@ func main() {
 	router.NoMethod(middleware.NoMethod())
 
 	health.RegisterRoutes(router)
+
+	v1 := router.Group("/api/v1")
+	auth.RegisterRoutes(v1, database, cfg)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
